@@ -113,7 +113,7 @@ function Portfolio() {
       </header>
 
       {/* hero */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pt-28 text-center">
+      <section className="relative flex min-h-[100svh] flex-col items-center justify-center px-5 pt-24 text-center sm:px-6 sm:pt-28">
         <Particles quantity={90} size={0.4} staticity={38} />
         <DotPattern />
         <div
@@ -135,7 +135,7 @@ function Portfolio() {
         </BlurFade>
 
         <BlurFade delay={0.15}>
-          <h1 className="mt-8 max-w-4xl text-balance font-display text-5xl font-semibold leading-[0.95] sm:text-7xl md:text-8xl">
+          <h1 className="mt-7 max-w-4xl text-balance font-display text-[2.7rem] font-semibold leading-[0.95] sm:mt-8 sm:text-7xl md:text-8xl">
             <span className="text-ink">{t(ui.hero.titleTop)}</span>
             <br />
             <span className="text-muted-foreground">{t(ui.hero.titleBottom)}</span>
@@ -145,7 +145,7 @@ function Portfolio() {
         <BlurFade delay={0.28}>
           {/* Stacked on phones: the longest role would otherwise rewrap the line
               on every rotation and bounce everything under it. */}
-          <p className="mx-auto mt-7 flex max-w-xl flex-col items-center gap-x-2 text-base leading-relaxed text-muted-foreground sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-center sm:text-lg">
+          <p className="mx-auto mt-6 flex max-w-xl flex-col items-center gap-x-2 text-base leading-relaxed text-muted-foreground sm:mt-7 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-center sm:text-lg">
             <span>{t(ui.hero.buildPrefix)}</span>
             <WordRotate
               words={t(roles)}
@@ -160,14 +160,16 @@ function Portfolio() {
           </p>
         </BlurFade>
 
-        <BlurFade delay={0.46}>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <ShimmerButton href="#projects">{t(ui.hero.cta)}</ShimmerButton>
+        <BlurFade delay={0.46} className="w-full max-w-xs sm:max-w-none">
+          <div className="mt-9 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
+            <ShimmerButton href="#projects" className="w-full sm:w-auto">
+              {t(ui.hero.cta)}
+            </ShimmerButton>
             <a
               href={GITHUB}
               target="_blank"
               rel="noreferrer"
-              className="group relative flex items-center gap-2 overflow-hidden rounded-full border border-border px-7 py-3.5 text-sm font-medium transition-colors duration-300 hover:bg-accent"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full border border-border px-7 py-3.5 text-sm font-medium transition-colors duration-300 hover:bg-accent sm:w-auto"
             >
               @WinTone01
               <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -175,7 +177,7 @@ function Portfolio() {
           </div>
         </BlurFade>
 
-        <BlurFade delay={0.58} className="mt-20 w-full max-w-3xl">
+        <BlurFade delay={0.58} className="mt-12 w-full max-w-3xl sm:mt-20">
           <dl className="grid grid-cols-2 divide-x divide-y divide-border border-y border-border sm:grid-cols-4 sm:divide-y-0">
             {heroStats.map((s) => (
               <div key={s.key} className="px-4 py-5 sm:py-6">
@@ -191,7 +193,7 @@ function Portfolio() {
           </dl>
         </BlurFade>
 
-        <div className="mt-10 flex items-center gap-2 pb-16 text-xs text-muted-foreground">
+        <div className="mt-9 flex items-center gap-2 pb-12 text-xs text-muted-foreground sm:mt-10 sm:pb-16">
           <MapPin className="size-3.5" /> Türkiye · @Speaway · @Liwinux-Project
         </div>
       </section>
@@ -212,12 +214,12 @@ function Portfolio() {
       </section>
 
       {/* work */}
-      <section id="work" className="relative mx-auto max-w-5xl px-6 py-20 sm:py-36">
+      <section id="work" className="relative mx-auto max-w-5xl px-5 py-16 sm:px-6 sm:py-36">
         <BlurFade>
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
             {t(ui.work.eyebrow)}
           </p>
-          <h2 className="mt-5 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+          <h2 className="mt-4 max-w-2xl text-balance font-display text-3xl font-semibold sm:mt-5 sm:text-5xl">
             <TextAnimate key={t(ui.work.title)}>{t(ui.work.title)}</TextAnimate>
           </h2>
         </BlurFade>
@@ -244,7 +246,7 @@ function Portfolio() {
       </section>
 
       {/* projects */}
-      <section id="projects" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
+      <section id="projects" className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-6 sm:pb-36">
         <AnimatedGridPattern
           numSquares={14}
           maxOpacity={0.09}
@@ -256,7 +258,7 @@ function Portfolio() {
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
             {t(ui.projects.eyebrow)}
           </p>
-          <h2 className="mt-5 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+          <h2 className="mt-4 max-w-2xl text-balance font-display text-3xl font-semibold sm:mt-5 sm:text-5xl">
             <TextAnimate key={t(ui.projects.title)}>{t(ui.projects.title)}</TextAnimate>
           </h2>
           <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -273,7 +275,7 @@ function Portfolio() {
                   href={p.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-full flex-col p-6 sm:p-8"
+                  className="flex h-full flex-col p-5 sm:p-8"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-elevated">
@@ -301,8 +303,8 @@ function Portfolio() {
                   <h3
                     className={
                       p.span === 3
-                        ? "mt-8 font-display text-3xl font-semibold sm:text-4xl"
-                        : "mt-8 font-display text-xl font-semibold"
+                        ? "mt-7 font-display text-2xl font-semibold sm:mt-8 sm:text-4xl"
+                        : "mt-7 font-display text-xl font-semibold sm:mt-8"
                     }
                   >
                     <HyperText>{p.name}</HyperText>
@@ -355,7 +357,7 @@ function Portfolio() {
                 href={`${GITHUB}?tab=repositories`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-full flex-col justify-between p-7 sm:p-8"
+                className="flex h-full flex-col justify-between p-5 sm:p-8"
               >
                 <div className="flex items-start justify-between gap-4">
                   <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-elevated">
@@ -384,7 +386,7 @@ function Portfolio() {
       {/* contact */}
       <section
         id="contact"
-        className="relative overflow-hidden border-t border-border px-6 py-20 sm:py-32"
+        className="relative overflow-hidden border-t border-border px-5 py-16 sm:px-6 sm:py-32"
       >
         <Meteors number={12} />
         <div
@@ -392,7 +394,7 @@ function Portfolio() {
           aria-hidden
         />
         <BlurFade className="relative mx-auto max-w-3xl text-center">
-          <h2 className="text-balance font-display text-5xl font-semibold leading-tight sm:text-6xl">
+          <h2 className="text-balance font-display text-4xl font-semibold leading-tight sm:text-6xl">
             <span className="text-ink">{t(ui.contact.titleTop)}</span>{" "}
             <span className="text-muted-foreground">{t(ui.contact.titleBottom)}</span>
           </h2>
@@ -407,7 +409,7 @@ function Portfolio() {
         </BlurFade>
       </section>
 
-      <footer className="border-t border-border px-6 py-8">
+      <footer className="border-t border-border px-5 py-8 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 text-xs text-muted-foreground sm:flex-row">
           <span className="font-mono">© {new Date().getFullYear()} WinTone01</span>
           <span className="font-mono">{t(ui.footer.built)}</span>

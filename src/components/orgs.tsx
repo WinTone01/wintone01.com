@@ -18,12 +18,12 @@ export function Orgs() {
   const { t } = useLocale();
 
   return (
-    <section id="orgs" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
+    <section id="orgs" className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-6 sm:pb-36">
       <BlurFade>
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
           {t(ui.orgs.eyebrow)}
         </p>
-        <h2 className="mt-5 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+        <h2 className="mt-4 max-w-2xl text-balance font-display text-3xl font-semibold sm:mt-5 sm:text-5xl">
           <TextAnimate key={t(ui.orgs.title)}>{t(ui.orgs.title)}</TextAnimate>
         </h2>
       </BlurFade>
@@ -33,7 +33,7 @@ export function Orgs() {
           <BlurFade key={org.handle} delay={i * 0.1}>
             <SpotlightCard className="h-full">
               <BorderBeam duration={12} delay={i * 3} />
-              <div className="flex h-full flex-col p-6 sm:p-9">
+              <div className="flex h-full flex-col p-5 sm:p-9">
                 <div className="flex items-start justify-between gap-4">
                   <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-elevated">
                     <Building2 className="size-5" />
@@ -49,7 +49,9 @@ export function Orgs() {
                   </a>
                 </div>
 
-                <h3 className="mt-8 font-display text-2xl font-semibold sm:text-3xl">{org.name}</h3>
+                <h3 className="mt-7 font-display text-2xl font-semibold sm:mt-8 sm:text-3xl">
+                  {org.name}
+                </h3>
                 <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                   {t(org.role)}
                 </p>
@@ -92,7 +94,7 @@ export function Orgs() {
       {/* Upstream work — orbiting the point that this is other people's code. */}
       <BlurFade delay={0.12}>
         <div className="relative mt-4 overflow-hidden rounded-2xl border border-border bg-card sm:mt-5">
-          <div className="grid items-center gap-8 p-6 sm:p-9 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid items-center gap-8 p-5 sm:p-9 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0">
               <h3 className="font-display text-xl font-semibold">{t(ui.orgs.upstreamTitle)}</h3>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">

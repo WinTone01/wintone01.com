@@ -56,11 +56,18 @@ export function Particles({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    // A 3x display would otherwise ask the GPU for nine times the pixels of a
+    // field of dots nobody is looking closely at.
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const circles: Circle[] = [];
     const mouse = { x: 0, y: 0 };
     const canvasSize = { w: 0, h: 0 };
     let raf = 0;
+    let running = false;
+    // Refreshed lazily instead of on every mouse move: `getBoundingClientRect`
+    // in a pointer handler forces a layout on each of the hundreds of events a
+    // single gesture produces.
+    let rect: DOMRect | null = null;
     let rgb = "24, 24, 27";
 
     const readColor = () => {
@@ -102,6 +109,7 @@ export function Particles({
       canvas.style.width = `${canvasSize.w}px`;
       canvas.style.height = `${canvasSize.h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      rect = null;
       circles.length = 0;
       for (let i = 0; i < quantity; i++) drawCircle(circleParams());
     };
@@ -151,11 +159,31 @@ export function Particles({
           drawCircle(circleParams());
         }
       }
-      raf = window.requestAnimationFrame(animate);
+      if (running) raf = window.requestAnimationFrame(animate);
     };
 
+    /*
+     * The field lives in the hero, and the page below it is some fourteen
+     * thousand pixels tall. Left to itself the loop would keep redrawing ninety
+     * circles for the whole time a visitor spends reading the rest of the page,
+     * so it only runs while the hero is on screen and the tab is in front.
+     */
+    const start = () => {
+      if (running) return;
+      running = true;
+      raf = window.requestAnimationFrame(animate);
+    };
+    const stop = () => {
+      running = false;
+      window.cancelAnimationFrame(raf);
+    };
+
+    let visible = false;
+    const sync = () => (visible && !document.hidden ? start() : stop());
+
     const onMouseMove = (event: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
+      if (!running) return;
+      if (!rect) rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left - canvasSize.w / 2;
       const y = event.clientY - rect.top - canvasSize.h / 2;
       if (Math.abs(x) < canvasSize.w / 2 && Math.abs(y) < canvasSize.h / 2) {
@@ -163,10 +191,14 @@ export function Particles({
         mouse.y = y;
       }
     };
+    // The cached rect moves with the page, so it is thrown away on scroll and
+    // re-read by the next move that needs it.
+    const onScroll = () => {
+      rect = null;
+    };
 
     readColor();
     resize();
-    animate();
 
     const themeObserver = new MutationObserver(readColor);
     themeObserver.observe(document.documentElement, {
@@ -175,13 +207,26 @@ export function Particles({
     });
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
-    window.addEventListener("mousemove", onMouseMove);
+    const viewObserver = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry?.isIntersecting ?? false;
+        sync();
+      },
+      { rootMargin: "100px" },
+    );
+    viewObserver.observe(container);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", sync);
 
     return () => {
-      window.cancelAnimationFrame(raf);
+      stop();
       themeObserver.disconnect();
       resizeObserver.disconnect();
+      viewObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("visibilitychange", sync);
     };
   }, [quantity, staticity, ease, size, vx, vy, lite]);
 

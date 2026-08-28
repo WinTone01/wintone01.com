@@ -42,7 +42,9 @@ export function BackToTop() {
           transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label={t(ui.a11y.backToTop)}
-          className="glass fixed bottom-6 right-6 z-50 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors duration-300 hover:text-foreground"
+          // Lifted clear of the home indicator / gesture bar on a phone.
+          style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
+          className="glass fixed right-5 z-50 flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors duration-300 hover:text-foreground sm:right-6"
         >
           <ArrowUp className="size-4" />
         </motion.button>

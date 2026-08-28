@@ -15,7 +15,7 @@ export function TerminalShowcase() {
   const { t } = useLocale();
 
   return (
-    <section id="terminal" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
+    <section id="terminal" className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-6 sm:pb-36">
       <AnimatedGridPattern
         numSquares={18}
         maxOpacity={0.16}
@@ -27,7 +27,7 @@ export function TerminalShowcase() {
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
           {t(ui.terminal.eyebrow)}
         </p>
-        <h2 className="mt-5 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+        <h2 className="mt-4 max-w-2xl text-balance font-display text-3xl font-semibold sm:mt-5 sm:text-5xl">
           <TextAnimate key={t(ui.terminal.title)}>{t(ui.terminal.title)}</TextAnimate>
         </h2>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">

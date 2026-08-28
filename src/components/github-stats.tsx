@@ -84,12 +84,12 @@ export function GithubStats() {
     : "";
 
   return (
-    <section id="github" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
+    <section id="github" className="relative mx-auto max-w-6xl px-5 pb-16 sm:px-6 sm:pb-36">
       <BlurFade>
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
           {t(ui.github.eyebrow)}
         </p>
-        <h2 className="mt-5 max-w-2xl text-balance font-display text-4xl font-semibold sm:text-5xl">
+        <h2 className="mt-4 max-w-2xl text-balance font-display text-3xl font-semibold sm:mt-5 sm:text-5xl">
           {t(ui.github.title)}
         </h2>
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -105,12 +105,12 @@ export function GithubStats() {
         <BlurFade className="sm:col-span-2">
           <SpotlightCard className="h-full">
             <BorderBeam duration={12} />
-            <div className="flex h-full flex-col p-6 sm:p-8">
+            <div className="flex h-full flex-col p-5 sm:p-8">
               <div className="flex items-center gap-2">
                 <GitCommitHorizontal className="size-4" />
                 <h3 className="font-display text-lg font-semibold">{t(ui.github.contributions)}</h3>
               </div>
-              <p className="mt-6 font-display text-6xl font-semibold leading-none sm:text-7xl">
+              <p className="mt-6 font-display text-5xl font-semibold leading-none sm:text-7xl">
                 <NumberTicker value={stats.totalContributions} />
               </p>
               <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
@@ -120,14 +120,14 @@ export function GithubStats() {
               <div className="mt-auto pt-8">
                 <div className="flex flex-wrap gap-[3px]">
                   {stats.contributions.map((day, i) => (
-                    <motion.span
+                    <span
                       key={day.date}
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.003, duration: 0.3 }}
                       title={`${day.date}: ${day.count}`}
-                      className="size-[9px] rounded-[2px] bg-primary"
-                      style={{ opacity: Math.min(0.1 + day.count * 0.12, 1) }}
+                      className="heat-cell size-[9px] rounded-[2px] bg-primary"
+                      style={{
+                        opacity: Math.min(0.1 + day.count * 0.12, 1),
+                        animationDelay: `${i * 3}ms`,
+                      }}
                     />
                   ))}
                 </div>
@@ -187,7 +187,7 @@ export function GithubStats() {
       <div className="mt-4 grid gap-4 sm:mt-5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         <BlurFade delay={0.1} className="sm:col-span-2 lg:col-span-3">
           <SpotlightCard className="h-full">
-            <div className="p-6 sm:p-8">
+            <div className="p-5 sm:p-8">
               <h3 className="font-display text-lg font-semibold">{t(ui.github.languages)}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {fill(t(ui.github.languagesNote), stats.authoredRepos)}
@@ -206,10 +206,15 @@ export function GithubStats() {
                       </span>
                     </div>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      {/* Grown with scaleX rather than width: animating width
+                          relayouts the bar on every frame, and there are six of
+                          them running at once. */}
                       <motion.div
-                        className="h-full rounded-full bg-primary"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${lang?.percent}%` }}
+                        className="h-full origin-left rounded-full bg-primary"
+                        style={{ width: `${lang.percent}%` }}
+                        initial={{ scaleX: 0 }}
+                        whileInView={{ scaleX: 1 }}
+                        viewport={{ once: true, margin: "-40px" }}
                         transition={{
                           duration: 1.1,
                           delay: 0.1 * i,

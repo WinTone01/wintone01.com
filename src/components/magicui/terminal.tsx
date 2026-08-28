@@ -35,9 +35,15 @@ type SequenceContextValue = {
   complete: (index: number) => void;
 };
 
-/** One output line: never wraps, so the pane scrolls instead of reflowing. */
+/*
+ * One output line. From `sm` up it never wraps and the pane scrolls, which is
+ * how a terminal behaves. On a phone that was the wrong trade: the longest line
+ * here is 57 characters, roughly 410px of monospace against a ~285px pane, so
+ * the ends of half the output sat off screen behind a horizontal scroll almost
+ * nobody would think to use. Below `sm` the lines wrap instead.
+ */
 const LINE =
-  "grid whitespace-pre font-mono text-[12px] leading-relaxed tracking-tight sm:text-[13px]";
+  "grid whitespace-pre-wrap break-words font-mono text-[11.5px] leading-relaxed tracking-tight sm:whitespace-pre sm:text-[13px]";
 
 const SequenceContext = createContext<SequenceContextValue | null>(null);
 const ItemIndexContext = createContext<number | null>(null);
@@ -219,7 +225,7 @@ export function Terminal({
         <span className="ml-2 truncate font-mono text-[11px] text-muted-foreground">{title}</span>
       </div>
 
-      <div className="max-h-[440px] overflow-auto p-5 sm:p-6">
+      <div className="max-h-[440px] overflow-auto p-4 sm:p-6">
         {sequence ? (
           <SequenceContext.Provider value={value}>
             <div className="grid gap-1">{body}</div>

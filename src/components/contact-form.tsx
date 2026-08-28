@@ -11,8 +11,13 @@ import { Turnstile } from "@/components/turnstile";
 import { useLocale } from "@/components/locale-provider";
 import { fill, ui } from "@/lib/i18n";
 
+/*
+ * 16px on phones, not 14. Mobile Safari zooms the whole page in when a focused
+ * input is smaller than that, and it does not zoom back out — tapping the name
+ * field left the layout scaled up and scrolled sideways.
+ */
 const fieldClass =
-  "w-full rounded-xl border border-border bg-elevated px-4 py-3 text-sm outline-none transition-colors duration-300 placeholder:text-muted-foreground focus:border-ring";
+  "w-full rounded-xl border border-border bg-elevated px-4 py-3 text-base outline-none transition-colors duration-300 placeholder:text-muted-foreground focus:border-ring sm:text-sm";
 
 const REDIRECT_SECONDS = 6;
 
@@ -81,7 +86,7 @@ export function ContactForm() {
   }
 
   return (
-    <BlurFade className="relative mx-auto mt-14 w-full max-w-2xl">
+    <BlurFade className="relative mx-auto mt-12 w-full max-w-2xl sm:mt-14">
       <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 text-left sm:p-9">
         <BorderBeam duration={12} />
         <AnimatePresence mode="wait" initial={false}>

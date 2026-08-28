@@ -147,6 +147,9 @@
   }
 
   html {
+    /* The nav pill floats over the top of the page, so an anchor that lands
+       flush at scroll position 0 puts its own heading underneath it. */
+    scroll-padding-top: 6rem;
     transition:
       background-color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98),
       color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98);
@@ -206,20 +209,43 @@
   mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black, transparent 100%);
 }
 
+/*
+ * The beam used to animate the registered `--beam-angle` inside a conic
+ * gradient. That invalidates style and repaints the gradient every frame, for
+ * every beam on the page — it was the single most expensive thing here, on a
+ * desktop as much as on a phone.
+ *
+ * Now the gradient is painted once on a child and the child is *rotated*.
+ * Transform animations run on the compositor: no style recalc, no repaint.
+ * The child is kept square (`max(100cqw, 100cqh)`, hence `container-type`) so
+ * the wedge sweeps at an even angular speed and still covers the corners of a
+ * wide card — a rectangle would leave the far corners bare as it turns.
+ */
 .border-beam {
-  background: conic-gradient(
-    from var(--beam-angle, 0deg),
-    transparent 0deg,
-    var(--beam-color) 22deg,
-    transparent 60deg
-  );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   padding: 1px;
-  animation: beam-spin 8s linear infinite;
+  overflow: hidden;
+  container-type: size;
+}
+
+.border-beam::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(1.5 * max(100cqw, 100cqh));
+  aspect-ratio: 1;
+  background: conic-gradient(transparent 0deg, var(--beam-color) 22deg, transparent 60deg);
+  /* Matches the first keyframe. Several beams start on a delay, and without a
+     resting transform they would sit offset to the bottom-right until their
+     animation picked up. */
+  transform: translate(-50%, -50%);
+  animation: beam-spin var(--beam-duration, 8s) linear infinite;
+  animation-delay: var(--beam-delay, 0s);
 }
 
 .shiny-text {
@@ -231,15 +257,12 @@
   animation: shine 5s linear infinite;
 }
 
-@property --beam-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
 @keyframes beam-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
   to {
-    --beam-angle: 360deg;
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 
@@ -343,6 +366,44 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * The contribution heatmap is 120 cells. As 120 Motion components that was 120
+ * animation instances to create, subscribe and tear down on a section most
+ * visitors scroll straight past; as a CSS animation with an inline delay it is
+ * 120 plain spans. Only the transform animates — each cell's final opacity
+ * encodes its commit count, so opacity has to stay put.
+ */
+.heat-cell {
+  animation: heat-pop 0.3s cubic-bezier(0.21, 0.47, 0.32, 0.98) both;
+}
+
+@keyframes heat-pop {
+  from {
+    transform: scale(0.5);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Drifting squares in AnimatedGridPattern — paused by the component while the
+   section they decorate is off screen. */
+.grid-square {
+  /* Base state, so a stilled animation leaves the square invisible rather than
+     opaque. */
+  opacity: 0;
+  animation: grid-square-pulse var(--square-duration, 4s) ease-in-out infinite alternate;
+}
+
+@keyframes grid-square-pulse {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--square-opacity, 0.1);
+  }
+}
+
 @keyframes orbit {
   0% {
     transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px))
@@ -406,10 +467,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .border-beam,
+  .border-beam::before,
   .shiny-text,
   .shimmer-spark-inner,
-  .meteor {
+  .meteor,
+  .heat-cell,
+  .grid-square {
     animation: none !important;
   }
 

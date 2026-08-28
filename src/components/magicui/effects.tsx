@@ -101,21 +101,36 @@ export function BorderBeam({
   delay?: number | undefined;
   className?: string | undefined;
 }) {
-  // Animating the registered `--beam-angle` invalidates style every frame, per
-  // element. Thirteen of these accounted for most of a phone's style budget.
+  // The beam is a rotating conic gradient (see `.border-beam` in styles.css) —
+  // composited, so it costs nothing to *run*. What it does cost is a promoted
+  // layer per beam, and there are more than a dozen on the page, so each one is
+  // only mounted while its card is anywhere near the viewport.
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { margin: "200px" });
   const lite = useLiteMode();
   const reduced = useReducedMotion();
   if (lite || reduced) return null;
 
   return (
+    // `rounded-[inherit]` on both: the inner beam inherits its radius from this
+    // wrapper, so the wrapper has to carry the card's radius rather than 0.
     <span
-      className={cn(
-        "border-beam pointer-events-none absolute inset-0 rounded-[inherit]",
-        className,
-      )}
-      style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+      ref={ref}
+      className={cn("pointer-events-none absolute inset-0 rounded-[inherit]", className)}
       aria-hidden
-    />
+    >
+      {inView && (
+        <span
+          className="border-beam absolute inset-0 rounded-[inherit]"
+          style={
+            {
+              "--beam-duration": `${duration}s`,
+              "--beam-delay": `${delay}s`,
+            } as CSSProperties
+          }
+        />
+      )}
+    </span>
   );
 }
 
@@ -146,7 +161,7 @@ export function SpotlightCard({
         ? {}
         : { onMouseMove: onMove, onMouseLeave: () => setPos((p) => ({ ...p, active: false })) })}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:border-ring",
+        "group relative overflow-hidden rounded-2xl border border-border bg-card transition-colors duration-500 hover:border-ring",
         className,
       )}
     >
@@ -287,6 +302,9 @@ export function AnimatedGridPattern({
 }) {
   const id = useId();
   const ref = useRef<SVGSVGElement>(null);
+  // These sections are a long way apart on a 14000px page; nothing here should
+  // keep ticking while the one it decorates is off screen.
+  const inView = useInView(ref, { margin: "200px" });
   const lite = useLiteMode();
   const reduced = useReducedMotion();
   const [dims, setDims] = useState({ width: 0, height: 0 });
@@ -340,15 +358,10 @@ export function AnimatedGridPattern({
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
         {squares.map(({ pos: [sx, sy], id: squareId }, index) => (
-          <motion.rect
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, maxOpacity, 0] }}
-            transition={{
-              duration,
-              repeat: Infinity,
-              delay: index * 0.12,
-              repeatType: "reverse",
-            }}
+          // A CSS animation rather than a Motion one: two sections' worth of
+          // these is ~32 elements, and the compositor can hold them all without
+          // React or Motion being involved once they are on screen.
+          <rect
             key={`${sx}-${sy}-${squareId}`}
             width={width - 1}
             height={height - 1}
@@ -356,7 +369,15 @@ export function AnimatedGridPattern({
             y={sy * height + 1}
             fill="currentColor"
             strokeWidth="0"
-            className="text-foreground"
+            className="grid-square text-foreground"
+            style={
+              {
+                "--square-duration": `${duration}s`,
+                "--square-opacity": maxOpacity,
+                animationDelay: `${index * 0.12}s`,
+                animationPlayState: inView ? "running" : "paused",
+              } as CSSProperties
+            }
           />
         ))}
       </svg>
@@ -386,10 +407,15 @@ export function OrbitingCircles({
 }) {
   const items = useMemo(() => (Array.isArray(children) ? children : [children]), [children]);
   const reduced = useReducedMotion();
+  // Absolutely positioned so the sentinel cannot become a flex item of the
+  // container it is measuring.
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { margin: "150px" });
   const calculated = duration / speed;
 
   return (
     <>
+      <span ref={ref} className="pointer-events-none absolute inset-0" aria-hidden />
       {path && (
         <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
           <circle className="orbit-path fill-none stroke-1" cx="50%" cy="50%" r={radius} />
@@ -408,7 +434,7 @@ export function OrbitingCircles({
                 "--icon-size": `${iconSize}px`,
                 // Inline, because `animate-orbit` is the `animation` shorthand and
                 // it resets play-state — a utility class loses to it either way.
-                ...(reduced ? { animationPlayState: "paused" } : {}),
+                animationPlayState: reduced || !inView ? "paused" : "running",
               } as CSSProperties
             }
             className={cn(
@@ -427,6 +453,10 @@ export function OrbitingCircles({
 
 /* ---------------- Meteors ---------------- */
 export function Meteors({ number = 14, className }: { number?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // The contact section sits at the very bottom of the page; without this the
+  // field animates for the entire time a visitor spends above it.
+  const inView = useInView(ref, { margin: "100px" });
   const [meteors, setMeteors] = useState<CSSProperties[]>([]);
   const reduced = useReducedMotion();
   const lite = useLiteMode();
@@ -451,13 +481,14 @@ export function Meteors({ number = 14, className }: { number?: number; className
 
   return (
     <div
+      ref={ref}
       className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
       aria-hidden
     >
       {meteors.map((style, i) => (
         <span
           key={i}
-          style={style}
+          style={{ ...style, animationPlayState: inView ? "running" : "paused" }}
           className="meteor animate-meteor absolute size-[2px] rounded-full"
         />
       ))}
@@ -608,10 +639,18 @@ export function HyperText({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
   const reduced = useReducedMotion();
-  const [text, setText] = useState(children);
 
+  /*
+   * The scrambled frames are written straight to the node instead of through
+   * state. Every project card has one of these, and a card is a fair amount of
+   * React to re-render ~10 times for an effect that only ever touches a single
+   * text node. The rendered children stay the real text, so SSR, hydration and
+   * the reduced-motion path all show the name and nothing else has to know.
+   */
   useEffect(() => {
     if (!inView || reduced) return;
+    const node = ref.current;
+    if (!node) return;
 
     const steps = children.length;
     const tick = Math.max(duration / (steps || 1), 24);
@@ -619,25 +658,26 @@ export function HyperText({
 
     const id = setInterval(() => {
       frame += 1;
-      setText(
-        children
-          .split("")
-          .map((char, i) =>
-            i < frame || char === " "
-              ? char
-              : (SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)] ?? char),
-          )
-          .join(""),
-      );
+      node.textContent = children
+        .split("")
+        .map((char, i) =>
+          i < frame || char === " "
+            ? char
+            : (SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)] ?? char),
+        )
+        .join("");
       if (frame >= steps) clearInterval(id);
     }, tick);
 
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      node.textContent = children;
+    };
   }, [inView, children, duration, reduced]);
 
   return (
     <span ref={ref} className={cn("tabular", className)}>
-      {text}
+      {children}
     </span>
   );
 }
