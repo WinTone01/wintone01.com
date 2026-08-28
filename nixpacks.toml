@@ -1,0 +1,14 @@
+# Coolify / Nixpacks deployment.
+#
+# Without these, Nixpacks finds no `start` script, falls back to its static-site
+# provider and serves an empty webroot through Caddy -> every request is a 404.
+#
+# NITRO_PRESET overrides the config default (cloudflare-module), which builds a
+# Worker export with no HTTP listener. node-server emits a real Node server at
+# .output/server/index.mjs that binds 0.0.0.0:$PORT.
+[variables]
+NITRO_PRESET = "node-server"
+PORT = "3005"
+
+[start]
+cmd = "node .output/server/index.mjs"
