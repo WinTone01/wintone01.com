@@ -82,7 +82,7 @@ export function ContactForm() {
 
   return (
     <BlurFade className="relative mx-auto mt-14 w-full max-w-2xl">
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-7 text-left sm:p-9">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 text-left sm:p-9">
         <BorderBeam duration={12} />
         <AnimatePresence mode="wait" initial={false}>
           {sent ? (

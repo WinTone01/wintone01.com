@@ -96,16 +96,29 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="pointer-events-none fixed inset-0 z-[70] flex items-center justify-center bg-background/55 backdrop-blur-[3px]"
+            transition={{ duration: 0.2 }}
+            className="pointer-events-none fixed inset-0 z-[70] flex items-center justify-center bg-background/70 backdrop-blur-[2px]"
             role="status"
             aria-live="polite"
+            aria-label="Loading"
           >
-            <span className="glass flex items-center gap-3 rounded-full px-5 py-3 shadow-[var(--shadow-premium)]">
-              <span className="size-3.5 animate-spin rounded-full border-2 border-muted-foreground border-t-foreground" />
-              <span className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                {locale === "tr" ? "English" : "Türkçe"}
-              </span>
+            {/* Three dots breathing in sequence: no text to translate, and it
+                reads the same at any size, on any device. */}
+            <span className="flex items-center gap-2">
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="size-2.5 rounded-full bg-foreground"
+                  initial={{ opacity: 0.25, scale: 0.7 }}
+                  animate={{ opacity: [0.25, 1, 0.25], scale: [0.7, 1, 0.7] }}
+                  transition={{
+                    duration: 0.9,
+                    repeat: Infinity,
+                    delay: i * 0.15,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
             </span>
           </motion.div>
         )}

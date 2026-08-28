@@ -453,3 +453,44 @@
     animation: none !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Small screens: the decorative layer is cheaper here.
+ *
+ * A 120px blur radius is a full-viewport composite every frame it changes, and
+ * backdrop-filter on the floating nav is re-evaluated on every scroll. Both are
+ * ornamental, so they are dialled back rather than tuned.
+ * ------------------------------------------------------------------------ */
+@media (max-width: 1023px) {
+  .halo-bg {
+    /* Painted flat instead of blurred — the gradient already reads as a glow. */
+    filter: none !important;
+    opacity: 0.5;
+  }
+
+  .glass {
+    backdrop-filter: blur(10px);
+  }
+
+  .dot-pattern {
+    background-size: 32px 32px;
+  }
+}
+
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .border-beam,
+  .meteor {
+    display: none;
+  }
+
+  /* No blur pass at all on the cheap tier. */
+  .blur-fade {
+    filter: none !important;
+  }
+}
+
+/* Once a reveal has landed, release its compositing layer. A `blur(0px)` is
+   visually nothing but still costs a filter pass and a layer per element. */
+.blur-fade[data-settled="true"] {
+  filter: none !important;
+}

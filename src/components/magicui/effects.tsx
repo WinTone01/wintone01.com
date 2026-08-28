@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useLiteMode } from "@/hooks/use-perf-tier";
 import { cn } from "@/lib/utils";
 
 /* ---------------- BlurFade ---------------- */
@@ -40,12 +41,33 @@ export function BlurFade({
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once, margin: "-60px" });
   const reduced = useReducedMotion();
+  const lite = useLiteMode();
+  const [settled, setSettled] = useState(false);
+
+  /*
+   * A `filter` — even `blur(0px)` — keeps an element on its own compositing
+   * layer and in the filter pipeline for as long as it is set, and a full page
+   * load left dozens of them behind. So:
+   *   - lite mode drops the blur entirely, fading on opacity and y alone;
+   *   - elsewhere the settled state animates to `none`, which is not
+   *     interpolatable and therefore snaps, releasing the layer.
+   *
+   * It has to go through the variant, not the `style` prop: Motion owns the
+   * inline value it animated and wins against `style`.
+   */
+  const blurs = !reduced && !lite;
+  const visible = {
+    y: 0,
+    opacity: 1,
+    filter: blurs && !settled ? "blur(0px)" : "none",
+  };
   const variants: Variants = {
     hidden: reduced
-      ? { y: 0, opacity: 1, filter: "blur(0px)" }
-      : { y: yOffset, opacity: 0, filter: "blur(8px)" },
-    visible: { y: 0, opacity: 1, filter: "blur(0px)" },
+      ? visible
+      : { y: yOffset, opacity: 0, ...(blurs ? { filter: "blur(8px)" } : { filter: "none" }) },
+    visible,
   };
+
   return (
     <motion.div
       ref={ref}
@@ -55,9 +77,14 @@ export function BlurFade({
       transition={
         reduced
           ? { duration: 0 }
-          : { delay: 0.05 + delay, duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }
+          : { delay: 0.05 + delay, duration: lite ? 0.45 : 0.7, ease: [0.21, 0.47, 0.32, 0.98] }
       }
-      className={className}
+      onAnimationComplete={() => setSettled(true)}
+      // Motion cannot tween `blur(0px)` to `none` — it is a type change, not a
+      // value change — so it leaves the zero blur (and its compositing layer)
+      // in place. The class and this attribute let CSS drop it for certain.
+      data-settled={settled ? "true" : undefined}
+      className={cn("blur-fade", className)}
     >
       {children}
     </motion.div>
@@ -74,6 +101,12 @@ export function BorderBeam({
   delay?: number | undefined;
   className?: string | undefined;
 }) {
+  // Animating the registered `--beam-angle` invalidates style every frame, per
+  // element. Thirteen of these accounted for most of a phone's style budget.
+  const lite = useLiteMode();
+  const reduced = useReducedMotion();
+  if (lite || reduced) return null;
+
   return (
     <span
       className={cn(
@@ -95,6 +128,7 @@ export function SpotlightCard({
   className?: string | undefined;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const lite = useLiteMode();
   const [pos, setPos] = useState({ x: 0, y: 0, active: false });
 
   function onMove(e: MouseEvent<HTMLDivElement>) {
@@ -103,11 +137,14 @@ export function SpotlightCard({
     setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top, active: true });
   }
 
+  // A spotlight that follows the cursor has nothing to follow on a touch screen,
+  // and the handler would still re-render the card on every scroll-adjacent move.
   return (
     <div
       ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={() => setPos((p) => ({ ...p, active: false }))}
+      {...(lite
+        ? {}
+        : { onMouseMove: onMove, onMouseLeave: () => setPos((p) => ({ ...p, active: false })) })}
       className={cn(
         "group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:border-ring",
         className,
@@ -143,8 +180,14 @@ export function Marquee({
   duration?: number | undefined;
   pauseOnHover?: boolean | undefined;
 }) {
+  // An infinite marquee keeps the compositor busy even when it is nowhere near
+  // the viewport, and this page is ~14000px tall.
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "200px" });
+
   return (
     <div
+      ref={ref}
       className={cn(
         "group flex overflow-hidden [--gap:2.5rem]",
         "[mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]",
@@ -159,7 +202,10 @@ export function Marquee({
             reverse ? "animate-marquee-reverse" : "animate-marquee",
             pauseOnHover && "group-hover:[animation-play-state:paused]",
           )}
-          style={{ animationDuration: `${duration}s` }}
+          style={{
+            animationDuration: `${duration}s`,
+            animationPlayState: inView ? "running" : "paused",
+          }}
           aria-hidden={i === 1}
         >
           {children}
@@ -241,6 +287,8 @@ export function AnimatedGridPattern({
 }) {
   const id = useId();
   const ref = useRef<SVGSVGElement>(null);
+  const lite = useLiteMode();
+  const reduced = useReducedMotion();
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const [squares, setSquares] = useState<{ id: number; pos: [number, number] }[]>([]);
 
@@ -254,8 +302,13 @@ export function AnimatedGridPattern({
 
   useEffect(() => {
     if (!dims.width || !dims.height) return;
+    // The static grid lines stay; only the drifting squares are dropped.
+    if (lite || reduced) {
+      setSquares([]);
+      return;
+    }
     setSquares(Array.from({ length: numSquares }, (_, i) => ({ id: i, pos: getPos() })));
-  }, [dims.width, dims.height, numSquares, getPos]);
+  }, [dims.width, dims.height, numSquares, getPos, lite, reduced]);
 
   useEffect(() => {
     const el = ref.current;
@@ -376,10 +429,11 @@ export function OrbitingCircles({
 export function Meteors({ number = 14, className }: { number?: number; className?: string }) {
   const [meteors, setMeteors] = useState<CSSProperties[]>([]);
   const reduced = useReducedMotion();
+  const lite = useLiteMode();
 
   // Randomised on the client only, so SSR and hydration agree on an empty field.
   useEffect(() => {
-    if (reduced) {
+    if (reduced || lite) {
       setMeteors([]);
       return;
     }
@@ -393,7 +447,7 @@ export function Meteors({ number = 14, className }: { number?: number; className
         ["--meteor-duration" as string]: `${(Math.random() * 4 + 5).toFixed(2)}s`,
       })),
     );
-  }, [number, reduced]);
+  }, [number, reduced, lite]);
 
   return (
     <div
@@ -418,6 +472,9 @@ export function ShimmerButton({
   speed = "3s",
   ...props
 }: ComponentPropsWithoutRef<"a"> & { speed?: string }) {
+  const lite = useLiteMode();
+  const reduced = useReducedMotion();
+
   return (
     <a
       {...props}
@@ -429,9 +486,11 @@ export function ShimmerButton({
       )}
     >
       {/* the travelling spark, clipped to the button's inner edge */}
-      <span className="shimmer-spark animate-shimmer-slide -z-30 blur-[2px]">
-        <span className="shimmer-spark-inner" />
-      </span>
+      {!lite && !reduced && (
+        <span className="shimmer-spark animate-shimmer-slide -z-30 blur-[2px]">
+          <span className="shimmer-spark-inner" />
+        </span>
+      )}
       <span className="relative z-10 flex items-center gap-2">{children}</span>
       <span className="absolute inset-[1px] -z-20 rounded-full bg-primary" />
     </a>
@@ -469,7 +528,7 @@ export function WordRotate({
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           exit={{ opacity: 0, y: "-70%", filter: "blur(6px)" }}
           transition={{ duration: 0.42, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className={cn("col-start-1 row-start-1", className)}
+          className={cn("blur-fade col-start-1 row-start-1", className)}
         >
           {words[index]}
         </motion.span>
@@ -495,6 +554,8 @@ export function TextAnimate({
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once, margin: "-40px" });
   const reduced = useReducedMotion();
+  const lite = useLiteMode();
+  const [settledWords, setSettledWords] = useState(false);
   const words = children.split(" ");
 
   return (
@@ -502,22 +563,26 @@ export function TextAnimate({
       {words.map((word, i) => (
         <span key={`${word}-${i}`} className="inline-block overflow-hidden align-bottom">
           <motion.span
-            className="inline-block"
+            className="blur-fade inline-block"
             initial={
-              reduced
-                ? { y: 0, opacity: 1, filter: "blur(0px)" }
+              reduced || lite
+                ? { y: 0, opacity: 1 }
                 : { y: "100%", opacity: 0, filter: "blur(6px)" }
             }
             animate={
               inView || reduced
-                ? { y: 0, opacity: 1, filter: "blur(0px)" }
-                : { y: "100%", opacity: 0, filter: "blur(6px)" }
+                ? { y: 0, opacity: 1, filter: "none" }
+                : lite
+                  ? { y: "100%", opacity: 0 }
+                  : { y: "100%", opacity: 0, filter: "blur(6px)" }
             }
             transition={
               reduced
                 ? { duration: 0 }
                 : { duration: 0.75, delay: delay + i * stagger, ease: [0.21, 0.47, 0.32, 0.98] }
             }
+            onAnimationComplete={() => setSettledWords(true)}
+            data-settled={settledWords ? "true" : undefined}
           >
             {word}
           </motion.span>

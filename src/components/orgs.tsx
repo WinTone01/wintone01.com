@@ -18,7 +18,7 @@ export function Orgs() {
   const { t } = useLocale();
 
   return (
-    <section id="orgs" className="relative mx-auto max-w-6xl px-6 pb-28 sm:pb-36">
+    <section id="orgs" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
       <BlurFade>
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
           {t(ui.orgs.eyebrow)}
@@ -28,12 +28,12 @@ export function Orgs() {
         </h2>
       </BlurFade>
 
-      <div className="mt-14 grid gap-5 lg:grid-cols-2">
+      <div className="mt-10 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-2">
         {orgs.map((org, i) => (
           <BlurFade key={org.handle} delay={i * 0.1}>
             <SpotlightCard className="h-full">
               <BorderBeam duration={12} delay={i * 3} />
-              <div className="flex h-full flex-col p-7 sm:p-9">
+              <div className="flex h-full flex-col p-6 sm:p-9">
                 <div className="flex items-start justify-between gap-4">
                   <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-elevated">
                     <Building2 className="size-5" />
@@ -91,8 +91,8 @@ export function Orgs() {
 
       {/* Upstream work — orbiting the point that this is other people's code. */}
       <BlurFade delay={0.12}>
-        <div className="relative mt-5 overflow-hidden rounded-2xl border border-border bg-card">
-          <div className="grid items-center gap-8 p-7 sm:p-9 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="relative mt-4 overflow-hidden rounded-2xl border border-border bg-card sm:mt-5">
+          <div className="grid items-center gap-8 p-6 sm:p-9 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0">
               <h3 className="font-display text-xl font-semibold">{t(ui.orgs.upstreamTitle)}</h3>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">

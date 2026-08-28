@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLiteMode } from "@/hooks/use-perf-tier";
 import { cn } from "@/lib/utils";
 
 type Circle = {
@@ -41,11 +42,15 @@ export function Particles({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lite = useLiteMode();
 
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
+    // A requestAnimationFrame loop plus a window-level mousemove listener, for a
+    // field that drifts toward a cursor that does not exist on a touch screen.
+    if (lite) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = canvas.getContext("2d");
@@ -178,7 +183,9 @@ export function Particles({
       resizeObserver.disconnect();
       window.removeEventListener("mousemove", onMouseMove);
     };
-  }, [quantity, staticity, ease, size, vx, vy]);
+  }, [quantity, staticity, ease, size, vx, vy, lite]);
+
+  if (lite) return null;
 
   return (
     <div

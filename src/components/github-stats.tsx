@@ -37,7 +37,7 @@ function Stat({
 }) {
   return (
     <SpotlightCard className={cn("h-full", className)}>
-      <div className="flex h-full flex-col p-5 sm:p-6">
+      <div className="flex h-full flex-col p-4 sm:p-6">
         <span className="flex size-9 items-center justify-center rounded-lg border border-border bg-elevated">
           <Icon className="size-4" />
         </span>
@@ -84,7 +84,7 @@ export function GithubStats() {
     : "";
 
   return (
-    <section id="github" className="relative mx-auto max-w-6xl px-6 pb-28 sm:pb-36">
+    <section id="github" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
       <BlurFade>
         <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
           {t(ui.github.eyebrow)}
@@ -100,12 +100,12 @@ export function GithubStats() {
         )}
       </BlurFade>
 
-      <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {/* contributions, all time */}
         <BlurFade className="sm:col-span-2">
           <SpotlightCard className="h-full">
             <BorderBeam duration={12} />
-            <div className="flex h-full flex-col p-7 sm:p-8">
+            <div className="flex h-full flex-col p-6 sm:p-8">
               <div className="flex items-center gap-2">
                 <GitCommitHorizontal className="size-4" />
                 <h3 className="font-display text-lg font-semibold">{t(ui.github.contributions)}</h3>
@@ -184,10 +184,10 @@ export function GithubStats() {
         </BlurFade>
       </div>
 
-      <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-4 sm:mt-5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         <BlurFade delay={0.1} className="sm:col-span-2 lg:col-span-3">
           <SpotlightCard className="h-full">
-            <div className="p-7 sm:p-8">
+            <div className="p-6 sm:p-8">
               <h3 className="font-display text-lg font-semibold">{t(ui.github.languages)}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {fill(t(ui.github.languagesNote), stats.authoredRepos)}
@@ -225,7 +225,7 @@ export function GithubStats() {
         </BlurFade>
 
         <BlurFade delay={0.16} className="sm:col-span-2 lg:col-span-1">
-          <div className="grid h-full gap-5 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="grid h-full gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-1">
             <Stat icon={GitFork} value={stats.forks} label={t(ui.github.forks)} />
             <Stat
               icon={GitCommitHorizontal}

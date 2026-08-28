@@ -72,7 +72,7 @@ function Portfolio() {
           initial={{ y: -24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="glass relative flex w-full max-w-3xl items-center justify-between rounded-full px-3 py-2 pl-5 shadow-[var(--shadow-premium)]"
+          className="glass relative flex w-full max-w-3xl items-center justify-between rounded-full px-2 py-2 pl-4 shadow-[var(--shadow-premium)] sm:px-3 sm:pl-5"
         >
           <span className="font-display text-sm font-semibold tracking-tight">WinTone01</span>
           <div className="hidden items-center gap-0.5 text-sm text-muted-foreground md:flex">
@@ -95,7 +95,7 @@ function Portfolio() {
               </a>
             ))}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <LocaleToggle />
             <ThemeToggle />
             <a
@@ -117,7 +117,7 @@ function Portfolio() {
         <Particles quantity={90} size={0.4} staticity={38} />
         <DotPattern />
         <div
-          className="pointer-events-none absolute left-1/2 top-[-10%] size-[720px] -translate-x-1/2 rounded-full opacity-70 blur-[120px] halo-bg"
+          className="halo-bg pointer-events-none absolute left-1/2 top-[-10%] size-[420px] -translate-x-1/2 rounded-full opacity-70 blur-[70px] sm:size-[720px] sm:blur-[120px]"
           aria-hidden
         />
 
@@ -176,9 +176,9 @@ function Portfolio() {
         </BlurFade>
 
         <BlurFade delay={0.58} className="mt-20 w-full max-w-3xl">
-          <dl className="grid grid-cols-2 border-y border-border sm:grid-cols-4 sm:divide-x sm:divide-border">
+          <dl className="grid grid-cols-2 divide-x divide-y divide-border border-y border-border sm:grid-cols-4 sm:divide-y-0">
             {heroStats.map((s) => (
-              <div key={s.key} className="px-4 py-6">
+              <div key={s.key} className="px-4 py-5 sm:py-6">
                 <dd className="font-display text-3xl font-semibold sm:text-4xl">
                   <NumberTicker value={s.n} />
                   <span className="text-muted-foreground">{s.suffix}</span>
@@ -197,14 +197,14 @@ function Portfolio() {
       </section>
 
       {/* stack marquee */}
-      <section id="stack" className="relative border-y border-border py-6">
+      <section id="stack" className="relative border-y border-border py-5 sm:py-6">
         <Marquee duration={48}>
           {stack.map((s) => (
             <span
               key={s}
-              className="flex items-center gap-2.5 font-display text-xl font-medium text-muted-foreground transition-colors duration-300 hover:text-foreground sm:text-2xl"
+              className="flex items-center gap-2 font-display text-base font-medium text-muted-foreground transition-colors duration-300 hover:text-foreground sm:gap-2.5 sm:text-2xl"
             >
-              <TechIcon name={s} className="size-5 sm:size-6" />
+              <TechIcon name={s} className="size-4 sm:size-6" />
               {s}
             </span>
           ))}
@@ -212,7 +212,7 @@ function Portfolio() {
       </section>
 
       {/* work */}
-      <section id="work" className="relative mx-auto max-w-5xl px-6 py-28 sm:py-36">
+      <section id="work" className="relative mx-auto max-w-5xl px-6 py-20 sm:py-36">
         <BlurFade>
           <p className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
             {t(ui.work.eyebrow)}
@@ -222,7 +222,7 @@ function Portfolio() {
           </h2>
         </BlurFade>
 
-        <div className="mt-16 divide-y divide-border border-t border-border">
+        <div className="mt-10 divide-y divide-border border-t border-border sm:mt-16">
           {lanes.map((w, i) => (
             <BlurFade key={w.title.en} delay={i * 0.08}>
               <div className="group grid gap-3 py-8 transition-colors duration-500 sm:grid-cols-[140px_1fr] sm:gap-10">
@@ -244,7 +244,7 @@ function Portfolio() {
       </section>
 
       {/* projects */}
-      <section id="projects" className="relative mx-auto max-w-6xl px-6 pb-28 sm:pb-36">
+      <section id="projects" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
         <AnimatedGridPattern
           numSquares={14}
           maxOpacity={0.09}
@@ -264,7 +264,7 @@ function Portfolio() {
           </p>
         </BlurFade>
 
-        <div className="relative mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="relative mt-10 grid gap-4 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {projects.map((p, i) => (
             <BlurFade key={p.name} delay={i * 0.07} className={SPAN_CLASS[p.span]}>
               <SpotlightCard className="h-full">
@@ -273,7 +273,7 @@ function Portfolio() {
                   href={p.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-full flex-col p-7 sm:p-8"
+                  className="flex h-full flex-col p-6 sm:p-8"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <span className="flex size-11 items-center justify-center rounded-xl border border-border bg-elevated">
@@ -382,10 +382,13 @@ function Portfolio() {
       <GithubStats />
 
       {/* contact */}
-      <section id="contact" className="relative overflow-hidden border-t border-border px-6 py-32">
+      <section
+        id="contact"
+        className="relative overflow-hidden border-t border-border px-6 py-20 sm:py-32"
+      >
         <Meteors number={12} />
         <div
-          className="pointer-events-none absolute bottom-[-40%] left-1/2 size-[640px] -translate-x-1/2 rounded-full blur-[130px] halo-bg"
+          className="halo-bg pointer-events-none absolute bottom-[-40%] left-1/2 size-[380px] -translate-x-1/2 rounded-full blur-[70px] sm:size-[640px] sm:blur-[130px]"
           aria-hidden
         />
         <BlurFade className="relative mx-auto max-w-3xl text-center">

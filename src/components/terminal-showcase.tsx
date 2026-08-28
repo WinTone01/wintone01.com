@@ -15,7 +15,7 @@ export function TerminalShowcase() {
   const { t } = useLocale();
 
   return (
-    <section id="terminal" className="relative mx-auto max-w-6xl px-6 pb-28 sm:pb-36">
+    <section id="terminal" className="relative mx-auto max-w-6xl px-6 pb-20 sm:pb-36">
       <AnimatedGridPattern
         numSquares={18}
         maxOpacity={0.16}
@@ -35,7 +35,7 @@ export function TerminalShowcase() {
         </p>
       </BlurFade>
 
-      <div className="relative mt-14 grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div className="relative mt-10 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
         <BlurFade className="min-w-0">
           <Terminal title="wintone01@arch — nabız" className="h-full">
             <TypingAnimation className="text-muted-foreground">
