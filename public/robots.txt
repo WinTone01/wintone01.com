@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Blank-card previews are worse than none, so the crawlers that build them
+# are named explicitly rather than relying on the wildcard.
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+Sitemap: https://wintone01.com/sitemap.xml

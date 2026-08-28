@@ -1,0 +1,455 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * WinTone01 portfolio design system — monochrome premium, light + dark.
+ * Light: warm paper white with graphite ink. Dark: near-black with warm white.
+ * All colors in oklch. Never hardcode colors in components.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-elevated: var(--elevated);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-note: var(--note);
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
+  --animate-marquee-reverse: marquee-reverse var(--marquee-duration, 40s) linear infinite;
+  --animate-float: float 9s ease-in-out infinite;
+  --animate-orbit: orbit calc(var(--duration) * 1s) linear infinite;
+  --animate-meteor: meteor var(--meteor-duration, 5s) linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+  --animate-caret-blink: caret-blink 1.15s ease-out infinite;
+}
+
+/* Light theme (default) */
+:root {
+  color-scheme: light;
+  --radius: 0.875rem;
+  --background: oklch(0.985 0.002 285);
+  --foreground: oklch(0.18 0.004 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.004 285);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.004 285);
+  --primary: oklch(0.19 0.004 285);
+  --primary-foreground: oklch(0.985 0.002 285);
+  --secondary: oklch(0.955 0.002 285);
+  --secondary-foreground: oklch(0.19 0.004 285);
+  --muted: oklch(0.955 0.002 285);
+  --muted-foreground: oklch(0.48 0.006 285);
+  --accent: oklch(0.94 0.002 285);
+  --accent-foreground: oklch(0.19 0.004 285);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.18 0.004 285 / 12%);
+  --input: oklch(0.18 0.004 285 / 16%);
+  --ring: oklch(0.18 0.004 285 / 32%);
+  --elevated: oklch(0.975 0.002 285);
+  --spotlight: oklch(0.18 0.004 285 / 7%);
+  --glow: 0 18px 50px -22px oklch(0.18 0.004 285 / 45%);
+  --shadow-premium: 0 24px 70px -34px oklch(0.18 0.004 285 / 40%);
+  --beam-color: oklch(0.18 0.004 285 / 65%);
+  --pattern-dot: oklch(0.18 0.004 285 / 16%);
+  --pattern-line: oklch(0.18 0.004 285 / 8%);
+  --glass-bg: oklch(1 0 0 / 70%);
+  --gradient-ink: linear-gradient(
+    180deg,
+    oklch(0.18 0.004 285 / 100%) 0%,
+    oklch(0.18 0.004 285 / 62%) 100%
+  );
+  --shine-1: oklch(0.18 0.004 285 / 40%);
+  --shine-2: oklch(0.18 0.004 285 / 100%);
+  --halo: oklch(0.18 0.004 285 / 8%);
+  --shimmer-color: oklch(0.18 0.004 285 / 55%);
+  --particle: 24, 24, 27;
+  /* Terminal semantics — the only place hue is allowed, and kept desaturated. */
+  --ok: oklch(0.55 0.13 155);
+  --warn: oklch(0.62 0.13 75);
+  --note: oklch(0.55 0.11 250);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.155 0.004 285);
+  --foreground: oklch(0.972 0.003 285);
+  --card: oklch(0.191 0.004 285);
+  --card-foreground: oklch(0.972 0.003 285);
+  --popover: oklch(0.191 0.004 285);
+  --popover-foreground: oklch(0.972 0.003 285);
+  --primary: oklch(0.972 0.003 285);
+  --primary-foreground: oklch(0.155 0.004 285);
+  --secondary: oklch(0.242 0.004 285);
+  --secondary-foreground: oklch(0.972 0.003 285);
+  --muted: oklch(0.242 0.004 285);
+  --muted-foreground: oklch(0.678 0.006 285);
+  --accent: oklch(0.272 0.004 285);
+  --accent-foreground: oklch(0.972 0.003 285);
+  --destructive: oklch(0.62 0.21 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(1 0 0 / 28%);
+  --elevated: oklch(0.225 0.004 285);
+  --spotlight: oklch(1 0 0 / 8%);
+  --glow: 0 0 60px -12px oklch(1 0 0 / 22%);
+  --shadow-premium: 0 24px 70px -30px oklch(0 0 0 / 90%);
+  --beam-color: oklch(1 0 0 / 75%);
+  --pattern-dot: oklch(1 0 0 / 12%);
+  --pattern-line: oklch(1 0 0 / 5%);
+  --glass-bg: oklch(0.19 0.004 285 / 65%);
+  --gradient-ink: linear-gradient(180deg, oklch(1 0 0 / 100%) 0%, oklch(1 0 0 / 62%) 100%);
+  --shine-1: oklch(1 0 0 / 45%);
+  --shine-2: oklch(1 0 0 / 100%);
+  --halo: oklch(1 0 0 / 9%);
+  --shimmer-color: oklch(1 0 0 / 75%);
+  --particle: 250, 250, 250;
+  --ok: oklch(0.78 0.15 155);
+  --warn: oklch(0.83 0.14 80);
+  --note: oklch(0.76 0.11 250);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    transition:
+      background-color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98),
+      color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    transition:
+      background-color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98),
+      color 0.6s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  }
+
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+}
+
+@utility text-ink {
+  background: var(--gradient-ink);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px) saturate(150%);
+  border: 1px solid var(--border);
+}
+
+@utility halo-bg {
+  background: radial-gradient(circle, var(--halo), transparent 65%);
+}
+
+.dot-pattern {
+  background-image: radial-gradient(var(--pattern-dot) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent 100%);
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(to right, var(--pattern-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--pattern-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black, transparent 100%);
+}
+
+.border-beam {
+  background: conic-gradient(
+    from var(--beam-angle, 0deg),
+    transparent 0deg,
+    var(--beam-color) 22deg,
+    transparent 60deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  animation: beam-spin 8s linear infinite;
+}
+
+.shiny-text {
+  background: linear-gradient(100deg, var(--shine-1) 20%, var(--shine-2) 50%, var(--shine-1) 80%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+}
+
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+@keyframes shine {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-reverse {
+  from {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * MagicUI layer — orbit, meteors, shimmer, aurora text, animated grid.
+ * Every colour still comes from a token so both themes stay in sync.
+ * ------------------------------------------------------------------------ */
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+.orbit-path {
+  stroke: var(--pattern-dot);
+}
+
+.meteor {
+  background: var(--foreground);
+  box-shadow: 0 0 0 1px var(--halo);
+}
+
+.meteor::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--beam-color), transparent);
+}
+
+.shimmer-button {
+  --spread: 90deg;
+  --cut: 0.05em;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transform: translateZ(0);
+}
+
+.shimmer-spark {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  container-type: size;
+}
+
+.shimmer-spark-inner {
+  position: absolute;
+  inset: 0;
+  height: 100cqh;
+  aspect-ratio: 1;
+  animation: var(--animate-spin-around);
+  background: conic-gradient(
+    from calc(270deg - (var(--spread) * 0.5)),
+    transparent 0,
+    var(--shimmer-color) var(--spread),
+    transparent var(--spread)
+  );
+  translate: none;
+  border-radius: 0;
+}
+
+/* Text scramble / decode used by HyperText */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(calc(var(--angle) * 1deg)) translateY(calc(var(--radius) * 1px))
+      rotate(calc(var(--angle) * -1deg));
+  }
+  100% {
+    transform: rotate(calc(var(--angle) * 1deg + 360deg)) translateY(calc(var(--radius) * 1px))
+      rotate(calc((var(--angle) * -1deg) - 360deg));
+  }
+}
+
+@keyframes meteor {
+  0% {
+    transform: rotate(var(--meteor-angle, 215deg)) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    /* rotate(215deg) sends translateX(-N) down-and-right by (0.82N, 0.57N);
+       900px is what carries a streak across a full section height. */
+    transform: rotate(var(--meteor-angle, 215deg)) translateX(-900px);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
+}
+
+@keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+@keyframes caret-blink {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .border-beam,
+  .shiny-text,
+  .shimmer-spark-inner,
+  .meteor {
+    animation: none !important;
+  }
+
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation-play-state: paused !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * View-transition theme wipe (AnimatedThemeToggler).
+ * The default root cross-fade is turned off so the only thing animating is the
+ * clip-path circle the toggler drives; the new theme is painted on top of the
+ * old one rather than blended with it.
+ * ------------------------------------------------------------------------ */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* The 0.6s colour transitions would run underneath the wipe and muddy it. */
+:root:active-view-transition html,
+:root:active-view-transition body {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
