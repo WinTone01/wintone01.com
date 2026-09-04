@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider, themeInitScript } from "@/components/theme-provider";
 import { LocaleProvider } from "@/components/locale-provider";
 import { detectLocale } from "@/lib/locale.detect";
+import { PRELOAD_FONTS } from "@/lib/fonts";
 import { EMAIL, GITHUB, OG_IMAGE, SITE_URL, projects } from "@/lib/profile";
 
 function NotFoundComponent() {
@@ -117,22 +118,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // The two faces above the fold. Everything else is discovered from
-      // fonts.css and pulled only if a glyph in its unicode-range is rendered.
-      {
+      // The faces above the fold. Everything else is discovered from fonts.css
+      // and pulled only if a glyph in its unicode-range is rendered. The list is
+      // generated alongside the files, so a regenerated font cannot leave a
+      // preload pointing at a name that no longer exists.
+      ...PRELOAD_FONTS.map((href) => ({
         rel: "preload",
         as: "font",
         type: "font/woff2",
-        href: "/fonts/dm-sans-400-latin.woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "preload",
-        as: "font",
-        type: "font/woff2",
-        href: "/fonts/space-grotesk-600-latin.woff2",
-        crossOrigin: "anonymous",
-      },
+        href,
+        // Literal, not `string`: React types this as a closed union.
+        crossOrigin: "anonymous" as const,
+      })),
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },

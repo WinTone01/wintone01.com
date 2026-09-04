@@ -159,7 +159,8 @@ bun run dev
 
 `bun run lint` · `bun run test` · `bun run build`
 
-Fonts are self-hosted in `public/fonts`. Re-run `node scripts/fetch-fonts.mjs` after
+Fonts are self-hosted in `src/assets/fonts` so Vite fingerprints them and they inherit
+the immutable cache every emitted asset gets. Re-run `node scripts/fetch-fonts.mjs` after
 changing a weight in that script; `public/sitemap.xml` is stamped with the build date
 by a plugin in `vite.config.ts`.
 
