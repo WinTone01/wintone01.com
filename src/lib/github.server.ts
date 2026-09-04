@@ -86,6 +86,86 @@ function isoDay(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Bytes per language across every repository, as a share of the total.
+ *
+ * Extracted from the fetch so it can be tested without a network round trip —
+ * the percentages are the sort of thing that quietly stops adding up.
+ */
+export function summarizeLanguages(repos: Pick<RepoNode, "languages">[]) {
+  const byLang = new Map<string, number>();
+  for (const repo of repos) {
+    for (const edge of repo.languages.edges) {
+      byLang.set(edge.node.name, (byLang.get(edge.node.name) ?? 0) + edge.size);
+    }
+  }
+  const totalBytes = [...byLang.values()].reduce((a, b) => a + b, 0) || 1;
+  return [...byLang.entries()]
+    .map(([name, bytes]) => ({
+      name,
+      bytes,
+      percent: Math.round((bytes / totalBytes) * 1000) / 10,
+    }))
+    .sort((a, b) => b.bytes - a.bytes)
+    .slice(0, 6);
+}
+
+/**
+ * Every derived number on the panel — totals, best day, streaks, heatmap.
+ *
+ * `today` is a parameter rather than `new Date()` so a test can pin the window
+ * the heatmap is cut from.
+ */
+export function summarizeContributions(
+  byDate: Map<string, number>,
+  currentYear: number,
+  today: Date,
+) {
+  const ordered = [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const totalContributions = ordered.reduce((sum, [, count]) => sum + count, 0);
+  const thisYearPrefix = `${currentYear}-`;
+  const thisYearContributions = ordered
+    .filter(([date]) => date.startsWith(thisYearPrefix))
+    .reduce((sum, [, count]) => sum + count, 0);
+
+  let bestDay: ContributionDay = { date: "", count: 0 };
+  let longestStreak = 0;
+  let running = 0;
+  for (const [date, count] of ordered) {
+    if (count > bestDay.count) bestDay = { date, count };
+    running = count > 0 ? running + 1 : 0;
+    if (running > longestStreak) longestStreak = running;
+  }
+
+  // Today counts only if it already has activity, so an unfinished day does not
+  // read as a broken streak.
+  let currentStreak = 0;
+  for (let i = ordered.length - 1; i >= 0; i--) {
+    const entry = ordered[i];
+    if (!entry) break;
+    if (entry[1] > 0) currentStreak++;
+    else if (i !== ordered.length - 1) break;
+  }
+
+  const contributions: ContributionDay[] = [];
+  for (let i = HEATMAP_DAYS; i >= 0; i--) {
+    const d = new Date(today);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = isoDay(d);
+    contributions.push({ date: key, count: byDate.get(key) ?? 0 });
+  }
+
+  return {
+    ordered,
+    totalContributions,
+    thisYearContributions,
+    bestDay,
+    longestStreak,
+    currentStreak,
+    contributions,
+  };
+}
+
 async function loadGithubStats(token: string): Promise<GithubStats> {
   const currentYear = new Date().getUTCFullYear();
   const years: number[] = [];
@@ -127,21 +207,7 @@ async function loadGithubStats(token: string): Promise<GithubStats> {
   const stars = repos.reduce((sum, r) => sum + r.stargazerCount, 0);
   const forks = repos.reduce((sum, r) => sum + r.forkCount, 0);
 
-  const byLang = new Map<string, number>();
-  for (const repo of repos) {
-    for (const edge of repo.languages.edges) {
-      byLang.set(edge.node.name, (byLang.get(edge.node.name) ?? 0) + edge.size);
-    }
-  }
-  const totalBytes = [...byLang.values()].reduce((a, b) => a + b, 0) || 1;
-  const languages = [...byLang.entries()]
-    .map(([name, bytes]) => ({
-      name,
-      bytes,
-      percent: Math.round((bytes / totalBytes) * 1000) / 10,
-    }))
-    .sort((a, b) => b.bytes - a.bytes)
-    .slice(0, 6);
+  const languages = summarizeLanguages(repos);
 
   // Flatten every year's calendar into one date -> count map.
   const byDate = new Map<string, number>();
@@ -155,40 +221,16 @@ async function loadGithubStats(token: string): Promise<GithubStats> {
     }
   }
 
-  const ordered = [...byDate.entries()].sort(([a], [b]) => a.localeCompare(b));
-  const totalContributions = ordered.reduce((sum, [, count]) => sum + count, 0);
-  const thisYearPrefix = `${currentYear}-`;
-  const thisYearContributions = ordered
-    .filter(([date]) => date.startsWith(thisYearPrefix))
-    .reduce((sum, [, count]) => sum + count, 0);
-
-  let bestDay: ContributionDay = { date: "", count: 0 };
-  let longestStreak = 0;
-  let running = 0;
-  for (const [date, count] of ordered) {
-    if (count > bestDay.count) bestDay = { date, count };
-    running = count > 0 ? running + 1 : 0;
-    if (running > longestStreak) longestStreak = running;
-  }
-
-  // Today counts only if it already has activity, so an unfinished day does not
-  // read as a broken streak.
-  let currentStreak = 0;
-  for (let i = ordered.length - 1; i >= 0; i--) {
-    const entry = ordered[i];
-    if (!entry) break;
-    if (entry[1] > 0) currentStreak++;
-    else if (i !== ordered.length - 1) break;
-  }
-
-  const today = new Date();
-  const contributions: ContributionDay[] = [];
-  for (let i = HEATMAP_DAYS; i >= 0; i--) {
-    const d = new Date(today);
-    d.setUTCDate(d.getUTCDate() - i);
-    const key = isoDay(d);
-    contributions.push({ date: key, count: byDate.get(key) ?? 0 });
-  }
+  const summary = summarizeContributions(byDate, currentYear, new Date());
+  const {
+    ordered,
+    totalContributions,
+    thisYearContributions,
+    bestDay,
+    longestStreak,
+    currentStreak,
+    contributions,
+  } = summary;
 
   return {
     publicRepos: user.repositories.totalCount,

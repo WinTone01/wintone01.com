@@ -22,7 +22,7 @@ import { useLocale } from "@/components/locale-provider";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GithubStats } from "@/components/github-stats";
-import { ContactForm } from "@/components/contact-form";
+import { ContactFormSlot } from "@/components/contact-form-slot";
 import { Orgs } from "@/components/orgs";
 import { TerminalShowcase } from "@/components/terminal-showcase";
 import { MobileNav } from "@/components/mobile-nav";
@@ -63,6 +63,11 @@ function Portfolio() {
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background">
+      {/* Eight nav and toggle controls sit between the top of the document and
+          the content; this is the first tab stop and skips all of them. */}
+      <a href="#work" className="skip-link">
+        {t(ui.a11y.skipToContent)}
+      </a>
       <ScrollProgress />
       <BackToTop />
 
@@ -405,7 +410,7 @@ function Portfolio() {
             <Github className="size-4" />
             github.com/WinTone01
           </ShimmerButton>
-          <ContactForm />
+          <ContactFormSlot />
         </BlurFade>
       </section>
 

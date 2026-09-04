@@ -9,8 +9,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { DEFAULT_LOCALE, pick, type L10n, type Locale } from "@/lib/i18n";
-
-const STORAGE_KEY = "wintone-locale";
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/lib/locale.detect";
 
 type LocaleContextValue = {
   locale: Locale;
@@ -30,33 +29,29 @@ const LocaleContext = createContext<LocaleContextValue>({
   t: (value) => value[DEFAULT_LOCALE],
 });
 
-/**
- * Runs before paint so `<html lang>` is right for the first frame — assistive
- * tech and Google both read it, and correcting it after hydration is too late
- * for a crawler that never runs the client bundle.
- */
-export const localeInitScript = `(function(){try{var l=localStorage.getItem('${STORAGE_KEY}');if(l==='tr'||l==='en'){document.documentElement.lang=l;}}catch(e){}})();`;
+function writeCookie(locale: Locale) {
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${LOCALE_COOKIE}=${locale}; Path=/; Max-Age=${LOCALE_COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
+}
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+export function LocaleProvider({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}: {
+  children: ReactNode;
+  /** Resolved on the server from the cookie, so the first paint is already right. */
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const [switching, setSwitching] = useState(false);
 
+  // A first-time visitor was matched by Accept-Language, not by a cookie.
+  // Writing it back means the next request does not have to guess again.
   useEffect(() => {
-    let stored: Locale | null = null;
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw === "tr" || raw === "en") stored = raw;
-    } catch {
-      /* storage unavailable */
-    }
-
-    // No stored choice: follow the browser, since a Turkish visitor arriving
-    // from a Turkish-language project README should not have to hunt for it.
-    const preferred: Locale =
-      stored ?? (navigator.language?.toLowerCase().startsWith("tr") ? "tr" : DEFAULT_LOCALE);
-
-    setLocaleState(preferred);
-    document.documentElement.lang = preferred;
+    document.documentElement.lang = locale;
+    writeCookie(locale);
+    // Only ever on mount: later changes go through setLocale, which writes it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -68,11 +63,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((next: Locale) => {
     setSwitching(true);
     document.documentElement.lang = next;
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* storage unavailable */
-    }
+    writeCookie(next);
 
     startTransition(() => setLocaleState(next));
     // One frame past the commit, so the overlay never flashes out early.

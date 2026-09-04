@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./fonts.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -77,6 +78,7 @@
   --border: oklch(0.18 0.004 285 / 12%);
   --input: oklch(0.18 0.004 285 / 16%);
   --ring: oklch(0.18 0.004 285 / 32%);
+  --focus-ring: oklch(0.18 0.004 285);
   --elevated: oklch(0.975 0.002 285);
   --spotlight: oklch(0.18 0.004 285 / 7%);
   --glow: 0 18px 50px -22px oklch(0.18 0.004 285 / 45%);
@@ -90,7 +92,9 @@
     oklch(0.18 0.004 285 / 100%) 0%,
     oklch(0.18 0.004 285 / 62%) 100%
   );
-  --shine-1: oklch(0.18 0.004 285 / 40%);
+  /* The dim stop of the shimmer is what the text reads as for most of the
+     cycle, so it has to clear 4.5:1 on its own. At 40% it was 2.6:1. */
+  --shine-1: oklch(0.18 0.004 285 / 62%);
   --shine-2: oklch(0.18 0.004 285 / 100%);
   --halo: oklch(0.18 0.004 285 / 8%);
   --shimmer-color: oklch(0.18 0.004 285 / 55%);
@@ -122,6 +126,7 @@
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(1 0 0 / 28%);
+  --focus-ring: oklch(0.972 0.003 285);
   --elevated: oklch(0.225 0.004 285);
   --spotlight: oklch(1 0 0 / 8%);
   --glow: 0 0 60px -12px oklch(1 0 0 / 22%);
@@ -131,7 +136,7 @@
   --pattern-line: oklch(1 0 0 / 5%);
   --glass-bg: oklch(0.19 0.004 285 / 65%);
   --gradient-ink: linear-gradient(180deg, oklch(1 0 0 / 100%) 0%, oklch(1 0 0 / 62%) 100%);
-  --shine-1: oklch(1 0 0 / 45%);
+  --shine-1: oklch(1 0 0 / 58%);
   --shine-2: oklch(1 0 0 / 100%);
   --halo: oklch(1 0 0 / 9%);
   --shimmer-color: oklch(1 0 0 / 75%);
@@ -176,6 +181,50 @@
     font-family: var(--font-display);
     letter-spacing: -0.03em;
   }
+}
+
+/*
+ * One visible focus treatment for everything reachable by keyboard.
+ *
+ * The browser default is a 1px hairline that all but disappears on this
+ * background, and the form fields opted out of it entirely with `outline-none`,
+ * leaving a border going from 9% to 28% white as the only sign a field was
+ * focused.
+ *
+ * Deliberately outside `@layer base`: Tailwind v4 orders `base` before
+ * `utilities`, so a layered rule loses to `outline-none` no matter how specific
+ * it is. Unlayered styles outrank every layer, which is what this needs.
+ */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline-offset: 1px;
+  border-color: var(--focus-ring);
+}
+
+/* First tab stop on the page: eight nav and toggle controls stand between the
+   top of the document and the content without it. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 100;
+  translate: -50% -150%;
+  border-radius: 9999px;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: translate 0.2s ease;
+}
+
+.skip-link:focus-visible {
+  translate: -50% 0;
 }
 
 @utility text-ink {
@@ -254,6 +303,8 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  /* Animating background-position on background-clipped text repaints the text
+     every frame; the component pauses it once the badge scrolls away. */
   animation: shine 5s linear infinite;
 }
 

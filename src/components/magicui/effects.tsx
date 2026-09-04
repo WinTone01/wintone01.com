@@ -269,7 +269,21 @@ export function AnimatedShinyText({
   children: ReactNode;
   className?: string | undefined;
 }) {
-  return <span className={cn("shiny-text", className)}>{children}</span>;
+  // The shimmer animates background-position on background-clipped text, which
+  // repaints the glyphs every frame for as long as it runs — and it used to run
+  // for the whole visit, from a badge one screen tall at the top of the page.
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { margin: "100px" });
+
+  return (
+    <span
+      ref={ref}
+      className={cn("shiny-text", className)}
+      style={{ animationPlayState: inView ? "running" : "paused" }}
+    >
+      {children}
+    </span>
+  );
 }
 
 /* ---------------- DotPattern background ---------------- */

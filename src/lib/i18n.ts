@@ -175,6 +175,7 @@ export const ui = {
     openMenu: { en: "Open menu", tr: "Menüyü aç" },
     closeMenu: { en: "Close menu", tr: "Menüyü kapat" },
     backToTop: { en: "Back to top", tr: "Başa dön" },
+    skipToContent: { en: "Skip to content", tr: "İçeriğe geç" },
     toLight: { en: "Switch to light theme", tr: "Açık temaya geç" },
     toDark: { en: "Switch to dark theme", tr: "Koyu temaya geç" },
   },

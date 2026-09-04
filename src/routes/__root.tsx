@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider, themeInitScript } from "@/components/theme-provider";
-import { LocaleProvider, localeInitScript } from "@/components/locale-provider";
+import { LocaleProvider } from "@/components/locale-provider";
+import { detectLocale } from "@/lib/locale.detect";
 import { EMAIL, GITHUB, OG_IMAGE, SITE_URL, projects } from "@/lib/profile";
 
 function NotFoundComponent() {
@@ -116,11 +117,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // The two faces above the fold. Everything else is discovered from
+      // fonts.css and pulled only if a glyph in its unicode-range is rendered.
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap",
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/dm-sans-400-latin.woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/space-grotesk-600-latin.woff2",
+        crossOrigin: "anonymous",
       },
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
@@ -196,12 +207,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // Resolved from the request cookie on the server and from `document.cookie`
+  // on the client, so both passes agree and the served HTML is already in the
+  // visitor's language — `lang` included, which is what a crawler reads.
+  const locale = detectLocale();
+
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <script dangerouslySetInnerHTML={{ __html: localeInitScript }} />
       </head>
       <body>
         {children}
@@ -217,7 +232,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <LocaleProvider>
+        <LocaleProvider initialLocale={detectLocale()}>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </LocaleProvider>

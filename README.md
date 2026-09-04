@@ -134,6 +134,21 @@ record, address and environment variable is in
 | `GITHUB_TOKEN` | One GraphQL call for the stats panel. Public data only — a fine-grained token with no scopes is enough. Without it the panel falls back to the snapshot and says so. |
 | `MAILTRAP_API_TOKEN` | Contact form delivery. |
 | `TURNSTILE_SECRET_KEY` / `VITE_TURNSTILE_SITE_KEY` | Turnstile. Absent = skipped, so local development needs no Cloudflare credentials. |
+| `CONTACT_TO_ADDRESS` | Where the form delivers. Defaults to `support@wintone01.com`. |
+| `MAILTRAP_SANDBOX_INBOX_ID` | Switches to Mailtrap's sandbox, which captures mail instead of sending it. Set it in development. |
+
+## Deployment
+
+Coolify builds this with Nixpacks. Two things in [`nixpacks.toml`](nixpacks.toml) make that
+work and are easy to lose:
+
+| Variable | Why |
+|---|---|
+| `NITRO_PRESET=node-server` | The vite config defaults Nitro to `cloudflare-module`, which emits a Worker export with no HTTP listener. |
+| `PORT` | The port the built server binds. Keep it in step with the port Coolify exposes. |
+
+Without a `start` script Nixpacks decides this is a static site and serves an empty
+webroot through Caddy, which answers every request with a 404.
 
 ## Development
 
@@ -142,7 +157,11 @@ bun install
 bun run dev
 ```
 
-`bun run lint` · `bun run build`
+`bun run lint` · `bun run test` · `bun run build`
+
+Fonts are self-hosted in `public/fonts`. Re-run `node scripts/fetch-fonts.mjs` after
+changing a weight in that script; `public/sitemap.xml` is stamped with the build date
+by a plugin in `vite.config.ts`.
 
 ## Licence
 

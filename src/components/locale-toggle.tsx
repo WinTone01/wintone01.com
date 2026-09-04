@@ -26,7 +26,9 @@ export function LocaleToggle({ className }: { className?: string | undefined }) 
             aria-label={t(code === "tr" ? ui.a11y.switchToTurkish : ui.a11y.switchToEnglish)}
             aria-pressed={active}
             className={cn(
-              "relative z-10 rounded-full px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors duration-300",
+              // Each half fills the pill's full height, so the tap target is
+              // the 34x32 the eye already reads it as rather than 34x25.
+              "relative z-10 flex h-8 items-center rounded-full px-3 font-mono text-[11px] uppercase tracking-wider transition-colors duration-300",
               active ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >

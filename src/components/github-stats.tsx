@@ -65,7 +65,7 @@ const snapshot: GithubStats = { ...(snapshotJson as Omit<GithubStats, "live">), 
 export function GithubStats() {
   const { t, locale } = useLocale();
   const fetchStats = useServerFn(getGithubStats);
-  const { data: stats = snapshot } = useQuery({
+  const { data: stats = snapshot, isFetched } = useQuery({
     queryKey: ["github-stats"],
     queryFn: () => fetchStats(),
     staleTime: 1000 * 60 * 30,
@@ -95,7 +95,10 @@ export function GithubStats() {
         <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           {t(ui.github.body)}
         </p>
-        {!stats.live && (
+        {/* Only once the query has actually answered. The server-rendered pass
+            starts from the snapshot, so this used to tell every single visitor
+            the API was unreachable before anything had been asked of it. */}
+        {isFetched && !stats.live && (
           <p className="mt-3 max-w-xl text-xs text-muted-foreground">{t(ui.github.stale)}</p>
         )}
       </BlurFade>
