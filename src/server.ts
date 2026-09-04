@@ -64,9 +64,12 @@ const CSP = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   // Turnstile serves its widget script and runs its challenge in a frame.
-  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+  // The insights beacon is injected into the response by Cloudflare itself when
+  // Web Analytics is on for the zone — leave it out and the CSP silently turns
+  // the zone's analytics off, which is how it was found.
+  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
   "frame-src https://challenges.cloudflare.com",
-  "connect-src 'self' https://challenges.cloudflare.com",
+  "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com",
   "style-src 'self' 'unsafe-inline'",
   // Fonts are served from this origin now, so nothing off-site is allowed.
   "font-src 'self'",
