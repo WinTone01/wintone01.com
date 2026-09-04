@@ -22,7 +22,7 @@ Mailtrap shows you**, the selectors and hostnames are per-account:
 
 | Type | Name | Value |
 |---|---|---|
-| TXT | `wintone01.com` | `v=spf1 include:_spf.mailtrap.live ~all` |
+| TXT | `wintone01.com` | `v=spf1 include:_spf.smtp.mailtrap.live ~all` |
 | TXT | `rwmt1._domainkey` | (DKIM key from Mailtrap) |
 | TXT | `rwmt2._domainkey` | (DKIM key from Mailtrap) |
 | CNAME | `mt-link` | (link-tracking host, optional) |
@@ -32,7 +32,15 @@ Notes:
 
 - **Only one SPF record per domain.** If `wintone01.com` already has a `v=spf1`
   TXT record, merge the `include:` into it rather than adding a second — two SPF
-  records is a permanent error and mail starts failing.
+  records is a permanent error and mail starts failing. Enabling Email Routing
+  publishes one of its own, so the merged record is what the domain needs:
+
+  ```
+  v=spf1 include:_spf.smtp.mailtrap.live include:_spf.mx.cloudflare.net ~all
+  ```
+
+  Email Routing locks the records it manages. To edit that TXT, unlock them
+  first: *Email Routing → DNS records → Unlock*.
 - Start DMARC at `p=none` and read the reports for a week or two before moving to
   `quarantine`. Going straight to `reject` on a fresh sending domain is how you
   find out something was misconfigured by having your mail disappear.
@@ -55,6 +63,13 @@ Then add the destination addresses:
 
 Cloudflare emails the destination address a confirmation link; the route stays
 inactive until you click it.
+
+A verified address under *Destination Addresses* is only half of it — that tab
+is a list of inboxes Cloudflare is allowed to forward **to**. Mail for
+`support@wintone01.com` is only accepted once a rule under *Routing rules* maps
+that custom address to one of them. Without the rule Cloudflare answers `550`
+and every message hard-bounces, which is also how a sender ends up on an ESP's
+suppression list.
 
 `noreply@wintone01.com` deliberately gets **no** route — replies to it should
 bounce. The notification carries `Reply-To: <the visitor>`, so replying in your
@@ -119,6 +134,30 @@ curl -X POST https://send.api.mailtrap.io/api/send \
 A `200` means Mailtrap accepted it; the mail arriving in your real inbox means
 Cloudflare's forwarding works too. Check the headers show `dkim=pass` and
 `spf=pass` — Gmail shows them under *Show original*.
+
+### When it says "Not Delivered"
+
+Mailtrap shows the same status for two opposite situations, and the field that
+tells them apart is **Mailtrap Sending IP**:
+
+| Last Event | Sending IP | What actually happened |
+|---|---|---|
+| `Bounced` | an IP | Mailtrap sent it; the receiving server refused it. The bounce text is the receiving server's own words — read it. |
+| `Rejected` | `—` | Mailtrap never sent it. The recipient is on the account's **suppression list**. |
+
+The two chain together, which is what makes it confusing: one hard bounce
+(`5.1.1 Address does not exist`, from Cloudflare, because the address had no
+routing rule yet) puts the address on the suppression list, and from then on
+every send is `Rejected` before it leaves Mailtrap. Fixing the routing rule does
+not clear the list.
+
+So repair it in this order:
+
+1. Cloudflare → *Email Routing → Routing rules* — the address needs a rule (or an
+   active catch-all). Confirm with *Activity Log*: if nothing appears there, the
+   mail never reached Cloudflare and the problem is still upstream.
+2. Mailtrap → *Suppressions* — delete the address.
+3. Re-send. `Mailtrap Sending IP` being populated is the sign it actually left.
 
 ## Not enabled, and why
 
